@@ -1,1 +1,37 @@
+name: Build Kernel
 
+on:
+  workflow_dispatch:
+    inputs:
+      BRANCH_GIT_URL:
+        description: 'BRANCH_GIT_URL to clone twrp device tree'
+        required: true
+        default: 'android-12.1 https://github.com/SN-Abdullah-Al-Noman/a22_TWRP12.1_tree'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1️⃣ Checkout code
+        uses: actions/checkout@v2
+
+      - name: 2️⃣ Installing packages.
+        run: |
+          sudo apt update && sudo apt upgrade -y && sudo apt install -y git bc bison build-essential curl flex g++-multilib gcc-multilib gnupg gperf imagemagick lib32ncurses-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush schedtool squashfs-tools xsltproc zip zlib1g-dev openjdk-11-jdk repo python-is-python3 ccache rsync && mkdir -p ~/bin && curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo && chmod a+x ~/bin/repo && export PATH=~/bin:$PATH && repo sync -j$(nproc --all) --force-sync
+          
+      - name: 3️⃣ Initializing twrp-12.1
+        run: |
+          yes | repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
+          
+      - name: 4️⃣ Cloning twrp device tree.
+        run: |
+          sudo git clone https://github.com/SN-Abdullah-Al-Noman/a22_TWRP12.1_tree -b android-12.1 device/samsung/a22
+          
+      - name: 5️⃣ Sync Device Dependencies.
+        run: |
+          sudo bash convert.sh device/samsung/a22/twrp.dependencies && sudo repo sync -j$(nproc --all)
+
+      - name: 6️⃣ Building twrp.
+        run: |
+          sudo source build/envsetup.sh && sudo export ALLOW_MISSING_DEPENDENCIES=true && sudo lunch twrp_a22-eng && sudo make clean && sudo make recoveryimage -j$(nproc --all)
