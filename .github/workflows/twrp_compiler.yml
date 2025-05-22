@@ -26,6 +26,7 @@ jobs:
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
           sudo ln -sf ~/bin/repo /usr/bin/repo
+          repo init
 
       - name: Syncing Repo.
         run: |
@@ -34,7 +35,7 @@ jobs:
       - name: 3️⃣ Initializing twrp-12.1
         run: |
           yes | repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
-          
+
       - name: 4️⃣ Cloning twrp device tree.
         run: |
           sudo git clone https://github.com/SN-Abdullah-Al-Noman/a22_TWRP12.1_tree -b android-12.1 device/samsung/a22
