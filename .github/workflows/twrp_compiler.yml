@@ -18,15 +18,21 @@ jobs:
 
       - name: 2️⃣ Installing packages.
         run: |
-          sudo apt update && sudo apt upgrade -y && sudo apt install -y git bc bison build-essential curl flex g++-multilib gcc-multilib gnupg gperf imagemagick lib32ncurses-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush schedtool squashfs-tools xsltproc zip zlib1g-dev openjdk-11-jdk repo python-is-python3 ccache 
-
-      - name: Installing repo. 
+          sudo apt update && sudo apt upgrade -y
+          DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
+            linux-modules-extra-$(uname -r) \
+            gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib \
+            libc6-dev lib32ncurses-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils \
+            xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses-dev libsdl1.2-dev \
+            build-essential libgtk-3-dev libglu1-mesa-dev freeglut3-dev git libxml2 lzop pngcrush schedtool squashfs-tools \
+            imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses6 python3 tar
+  
+      - name: Install repo
         run: |
           mkdir ~/bin
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
           sudo ln -sf ~/bin/repo /usr/bin/repo
-          repo init
 
       - name: Syncing Repo.
         run: |
