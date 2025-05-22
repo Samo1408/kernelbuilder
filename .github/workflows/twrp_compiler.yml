@@ -38,6 +38,7 @@ jobs:
 
       - name: Syncing Repo.
         run: |
+          repo init
           repo sync -j$(nproc --all) --force-sync
       
       - name: 3️⃣ Initializing twrp-12.1
