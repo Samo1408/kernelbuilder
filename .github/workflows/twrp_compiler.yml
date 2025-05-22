@@ -38,7 +38,7 @@ jobs:
 
       - name: Syncing Repo.
         run: |
-          repo init
+          yes | repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
           repo sync -j$(nproc --all) --force-sync
       
       - name: 3️⃣ Initializing twrp-12.1
