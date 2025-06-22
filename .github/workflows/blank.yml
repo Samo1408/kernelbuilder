@@ -26,7 +26,7 @@ jobs:
 
       - name: 4️⃣ Cloning clang and toolchain.
         run: |
-          sudo git clone https://github.com/SN-Abdullah-Al-Noman/toolchain.git
+          sudo git clone https://github.com/SN-Abdullah-Al-Noman/toolchain.git kernel_source
           
       - name: 5️⃣ Starting kernel compile.
         run: |
