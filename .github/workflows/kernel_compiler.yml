@@ -6,7 +6,7 @@ on:
       BRANCH_GIT_URL:
         description: 'BRANCH_GIT_URL to clone kernel source'
         required: true
-        default: 'A225FXXSADXK2 https://github.com/SN-Abdullah-Al-Noman/SM-A225F'
+        default: 'Sus https://github.com/Samo141988/f22-fix'
 
 jobs:
   build:
@@ -33,6 +33,4 @@ jobs:
         run: |
           cd kernel_source && sudo bash build_kernel.sh
 
-      - name: 6️⃣ Uploading kernel in telegram.
-        run: |
-          sudo 7z a -mx9 kernel_source/arch/arm64/boot/Image.xz kernel_source/arch/arm64/boot/Image && sudo curl -F chat_id=2081111916 -F document=@kernel_source/arch/arm64/boot/Image.xz -F caption="Image.xz" https://api.telegram.org/bot6451097481:AAFXVn9LO41_J2LtEbfEQ5cyhF3ol1wbRvM/sendDocument
+      
