@@ -26,8 +26,7 @@ jobs:
 
       - name: 4️⃣ Cloning clang and toolchain.
         run: |
-          sudo git clone https://github.com/SN-Abdullah-Al-Noman/toolchain/clang/host/linux-x86/clang-r383902
-          sudo git clone https://github.com/SN-Abdullah-Al-Noman/toolchain/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+          sudo git clone https://github.com/SN-Abdullah-Al-Noman/toolchain.git
           
       - name: 5️⃣ Starting kernel compile.
         run: |
