@@ -6,7 +6,7 @@ on:
       BRANCH_GIT_URL:
         description: 'BRANCH_GIT_URL to clone kernel source'
         required: true
-        default: 'Sus https://github.com/Samo141988/f22-fix'
+        default: 'Sus-change-toolchain-dir https://github.com/Samo141988/f22-fix'
 
 jobs:
   build:
