@@ -30,6 +30,6 @@ jobs:
           
       - name: 5️⃣ Starting kernel compile.
         run: |
-          cd kernel_source && sudo bash build.sh
+          cd kernel_source && sudo bash build_kernel.sh
 
       
