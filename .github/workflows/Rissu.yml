@@ -4,15 +4,15 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'f22-rc2-susfs'
+        default: 'Sus-change-toolchain-dir'
         required: true
       DEFCONFIG: 
         description: Defconfig
-        default: 'rsuntk_defconfig'
-        required: false
+        default: 'f22_defconfig'
+        required: true
       LTO:
         description: 'Link Time Optimisation'
-        required: true
+        required: false
         default: 'none'
         type: choice
         options:
@@ -41,7 +41,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: kernel_root
-        repository: "Samo141988/m32susfs"
+        repository: "Samo141988/f22-fix"
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
