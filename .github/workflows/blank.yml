@@ -6,7 +6,7 @@ on:
       BRANCH_GIT_URL:
         description: 'BRANCH_GIT_URL to clone kernel source'
         required: true
-        default: 'Sus-change-toolchain-dir https://github.com/Samo141988/f22-fix'
+        default: 'Susfs_add https://github.com/Samo141988/kernel_samsung_f22_wmk_rebased'
 
 jobs:
   build:
