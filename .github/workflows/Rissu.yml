@@ -17,10 +17,7 @@ on:
       UPLOAD_LKM:
         description: Upload LKM
         type: boolean
-      NEW_CLANG:
-        description: Compile with newer Clang (clang-20)
-        type: boolean
-        
+      
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -97,7 +94,7 @@ jobs:
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
         Susfs: `echo $SUSFS_VERSION`
-        LTO: none
+        LTO: full
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
         
@@ -152,7 +149,7 @@ jobs:
         # Start stripping
         for file in $LIST; do
           echo -e "- Stripping `basename $file`"
-          $(pwd)/toolchains/clang/bin/llvm-strip "$file" --strip-unneeded
+          $(pwd)/toolchain/clang-wmk/bin/llvm-strip "$file" --strip-unneeded
         done
         mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
       working-directory: kernel_root
