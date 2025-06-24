@@ -94,7 +94,7 @@ jobs:
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
         Susfs: `echo $SUSFS_VERSION`
-        LTO: full
+        LTO: thin
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
         
