@@ -4,35 +4,38 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'android-4.19-stable'
+        default: 'staging'
         required: true
-      TARGET_DEVICE:
-        description: 'Device'
-        required: true
-        default: 'a12s'
-        type: choice
-        options:
-          - a12s
-          - m12
+      DEFCONFIG: 
+        description: Defconfig
+        default: 'rsuntk_defconfig'
+        required: false
       KSU:
         description: Add KernelSU support
         type: boolean
       UPLOAD_TO_TG:
         description: Upload to Telegram
         type: boolean
-      SELINUX_PERMISSIVE:
-        description: Permissive SELinux
+      UPLOAD_LKM:
+        description: Upload LKM
+        type: boolean
+      NEW_CLANG:
+        description: Compile with newer Clang (clang-20)
         type: boolean
         
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: buildjet-8vcpu-ubuntu-2204
     environment: telegramUpload
     steps:
+    - name: Get date
+      id: rundate
+      run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
+    
     - uses: actions/checkout@v4
       with:
-        repository: rsuntkOrgs/exynos850_ports
         path: kernel_root
+        repository: "rsuntkOrgs/kernel_samsung_m32"
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
@@ -40,86 +43,81 @@ jobs:
     - name: Prepare dependencies
       run: |
         sudo apt update -y
-        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget curl lz4 -y
+        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget aria2 curl lz4 -y
         sudo aptitude install libssl-dev -y
         
     - name: Fetch toolchains
       run: |
         mkdir toolchains
         cd toolchains
-        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/llvm-r450784/clang-r433403.tar.gz"
-        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android13-gsi/clang-r450784d.tar.gz"
-        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r522817.tar.gz"
-        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
-        echo "[+] Fetching clang 13"
-        mkdir clang && cd clang && wget -q -O clang.tar.gz $URL && tar -xf clang.tar.gz && rm *.gz && cd ..
-        curl -LSs https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh | bash -s androidcc-4.9
-        mv androidcc-4.9 google
+        if [[ "${{ github.event.inputs.NEW_CLANG }}" = "true" ]]; then
+          #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/tags/android-u-beta-1-gpl/clang-r458507.tar.gz"
+          echo "INFO: Downloading newer clang"
+          aria2c https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
+          mkdir clang && mv *.gz clang && cd clang && tar -xf *.gz && rm *.gz
+          cd ../..
+        else
+          curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-12
+          mv clang* clang
+        fi
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s arm-gnu
       working-directory: kernel_root
-    - name: Prepare timezone fix
-      run: |
-        sudo rm /etc/localtime
-        sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-      
+
     - name: Build kernel
       id: buildKernel
       run: |
         export PATH=$(pwd)/toolchains/clang/bin:$PATH
-        export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
+        export CROSS_COMPILE="$(pwd)/toolchains/google/bin/aarch64-linux-android-"
+        export CROSS_COMPILE_COMPAT="$(pwd)/toolchains/arm-gnu/bin/arm-linux-gnueabi-"
+        export CROSS_COMPILE_ARM32=$CROSS_COMPILE_COMPAT
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_USER="rsuntk"
-        export KBUILD_BUILD_HOST="nobody"
+        export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date`
+        export SELINUX_STATE="Enforcing"
         export IS_CI=true
-        
-        if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s" ]]; then
-          export DEFCONFIG="a12s_defconfig"
-          export DEVICE="A127F"
-          export DEVICE_ID="A12s"
-        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12" ]]; then
-          export DEFCONFIG="m12nsxx_defconfig"
-          export DEVICE="M127F"
-          export DEVICE_ID="M12"
-        fi
-        
-        #export PLATFORM_VERSION=13
+        export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
+        export DEVICE="M325FV"
+        export DEVICE_ID="M32"
+        export TARGET_PRODUCT="m32"
         export KERNELSU="${{ github.event.inputs.KSU }}"
         export LLVM=1
         export LLVM_IAS=1
-
-        if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
-          cd security && rm -rf selinux
-          git clone https://github.com/rsuntk/selinux_perm.git -b bringup --depth=1 selinux
-          rm -rf selinux/.git && cd ..
-          echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
-          cat arch/arm64/configs/$DEFCONFIG | grep "PERMISSIVE"
-          SELINUX_STATE="Permissive"
-        else
-          SELINUX_STATE="Enforcing"
-        fi
         
-        bash $(pwd)/prebuilt/build.sh kernel --jobs $(nproc --all) $(echo $DEFCONFIG)
+        bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
         	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
-          SUSFS_VERSION="-1"
-        else	
-          KSU_VERSION="No KernelSU"
+        else
+        	KSU_VERSION="No KernelSU"
         fi
         echo "- KernelSU version: $KSU_VERSION"
+
+        if [ -e $(pwd)/include/linux/susfs.h ]; then
+          SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
+        else
+          SUSFS_VERSION="Not available"
+        fi
         
         ## CREATE buildDetails.txt
         printf "Localversion: `./getutsrel`
         Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
-        Build: `echo $BUILD_START`
+        Build date: `echo $BUILD_START`
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
-        LTO: `echo $LTO`
+        Susfs: `echo $SUSFS_VERSION`
+        LTO: thin
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
         
         echo "TITLE=Galaxy `echo $DEVICE_ID` Kernel" >> $GITHUB_ENV
+        
+        echo ""
+        echo "===================================================="
+        strings out/arch/arm64/boot/Image | grep "Linux version"
+        echo "===================================================="
 
         mv out/.config out/build_config.txt
         gitsha1=$(git rev-parse --short HEAD)
@@ -138,8 +136,7 @@ jobs:
         name: Build-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
           kernel_root/out/arch/arm64/boot/*.gz
-          kernel_root/out/arch/arm64/boot/dts/exynos/*.dtb
-          kernel_root/out/arch/arm64/boot/dts/samsung/*.dtb
+          kernel_root/out/arch/arm64/boot/dts/mediatek/*.dtb
 
     - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
@@ -147,12 +144,6 @@ jobs:
         name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
         path: kernel_root/AnyKernel3/*
         compression-level: 9
-
-    - name: Cleanup useless files
-      continue-on-error: true
-      if: github.event.inputs.BUILD_TARGET == 'kernel'
-      run: |
-        rm out/vmlinux.o out/vmlinux out/System.map
         
     - name: Upload to Telegram
       if: github.event.inputs.UPLOAD_TO_TG == 'true'
@@ -161,22 +152,14 @@ jobs:
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       run: |
         if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
-          ZIP=$(find `pwd` -name "*.zip") && git clone https://github.com/rsuntk/rsuntkBotScript.git --depth=1 i && cp ./i/* . && rm -rf i && bash $(pwd)/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
+          ZIP=$(find `pwd` -name "*.zip")
+          git clone https://github.com/rsuntk/rsuntkBotScript.git --depth=1 i && cp ./i/* . && rm -rf i
+          bash $(pwd)/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
         fi
       working-directory: kernel_root
-      
-    - name: Check need LKM stripping
-      id: need_strip
-      run: |
-        LKM=$(find $(pwd) -type f -name "*.ko")
-        if [ "$LKM" = "" ]; then
-          echo "UPLOAD=false" >> $GITHUB_OUTPUT
-        else
-          echo "UPLOAD=true" >> $GITHUB_OUTPUT
-        fi
         
     - name: Strip LKMs
-      if: steps.need_strip.outputs.UPLOAD == 'true'
+      if: github.event.inputs.UPLOAD_LKM == 'true'
       run: |
         # Cleanup zip
         rm -rf *.zip
@@ -198,7 +181,7 @@ jobs:
       working-directory: kernel_root
         
     - name: Upload LKM
-      if: steps.need_strip.outputs.UPLOAD == 'true'
+      if: github.event.inputs.UPLOAD_LKM == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: LKM-${{ steps.buildKernel.outputs.buildDetails }}
