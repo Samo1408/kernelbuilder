@@ -14,9 +14,15 @@ on:
         description: Add KernelSU support
         type: boolean
       
-      UPLOAD_LKM:
-        description: Upload LKM
-        type: boolean
+      LTO:
+        description: 'Link Time Optimisation'
+        required: true
+        default: 'none'
+        type: choice
+        options:
+          - none
+          - thin
+          - full
       
 jobs:
   build:
@@ -64,13 +70,14 @@ jobs:
         export SELINUX_STATE="Enforcing"
         export IS_CI=true
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        export DEVICE="E225F"
-        export DEVICE_ID="F22"
+        export DEVICE="SM-E225F"
+        export DEVICE_ID="f22"
         export TARGET_PRODUCT="f22ins"
         export KERNELSU="${{ github.event.inputs.KSU }}"
         export LLVM=1
         export LLVM_IAS=1
-        
+        export LTO="${{ github.event.inputs.LTO }}"
+  
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
@@ -94,7 +101,7 @@ jobs:
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
         Susfs: `echo $SUSFS_VERSION`
-        LTO: thin
+        LTO: $LTO
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
         
@@ -132,31 +139,3 @@ jobs:
         compression-level: 9
         
     
-    - name: Strip LKMs
-      if: github.event.inputs.UPLOAD_LKM == 'true'
-      run: |
-        # Cleanup zip
-        rm -rf *.zip
-
-        # Create folder
-        mkdir ../kernel_object_tmp
-        mkdir kernel_object
-
-        # Only move neccessary path!
-        find $(pwd) -type f -name "*.ko" -exec mv {} ../kernel_object_tmp \;
-        LIST=$(find ../kernel_object_tmp -type f -name "*.ko")
-
-        # Start stripping
-        for file in $LIST; do
-          echo -e "- Stripping `basename $file`"
-          $(pwd)/toolchain/clang-wmk/bin/llvm-strip "$file" --strip-unneeded
-        done
-        mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
-      working-directory: kernel_root
-        
-    - name: Upload LKM
-      if: github.event.inputs.UPLOAD_LKM == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: LKM-${{ steps.buildKernel.outputs.buildDetails }}
-        path: kernel_root/kernel_object/*
