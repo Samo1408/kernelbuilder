@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'Sus_add'
+        default: 'Susfs_add'
         required: true
       DEFCONFIG: 
         description: Defconfig
