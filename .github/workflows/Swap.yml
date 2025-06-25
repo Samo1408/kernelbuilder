@@ -31,7 +31,7 @@ jobs:
     steps:
     - name: Get date
       id: rundate
-      run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/America/Chicago /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPU
+      run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/America/Chicago /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
         
     - uses: actions/checkout@v4
       with:
