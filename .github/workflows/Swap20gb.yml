@@ -1,0 +1,148 @@
+name: build with swap 20
+on:
+  workflow_dispatch:
+    inputs:
+      BRANCH:
+        description: Kernel branch
+        default: 'Susfs_add'
+        required: true
+      DEFCONFIG: 
+        description: Defconfig
+        default: 'f22_defconfig'
+        required: false
+      KSU:
+        description: Add KernelSU support
+        type: boolean
+      
+      LTO:
+        description: 'Link Time Optimisation'
+        required: true
+        default: 'none'
+        type: choice
+        options:
+          - none
+          - thin
+          - full
+      
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    environment: telegramUpload
+    steps:
+    - name: Get date
+      id: rundate
+      run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/America/Chicago /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
+    - name: Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+          swap-size-gb: 20
+    - uses: actions/checkout@v4
+      with:
+        path: kernel_root
+        repository: "Samo141988/kernel_samsung_f22_wmk_rebased"
+        ref: ${{ github.event.inputs.BRANCH }}
+        show-progress: false
+        fetch-depth: 1
+
+    
+    - name: Prepare dependencies
+      run: |
+        sudo apt update -y
+        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget aria2 curl lz4 zst -y
+        sudo aptitude install libssl-dev -y
+        sudo apt install apt-utils nano bc bison ca-certificates curl flex gcc git libc6-dev libssl-dev openssl ssh wget zip zstd sudo make clang gcc-arm-linux-gnueabi software-properties-common build-essential libarchive-tools gcc-aarch64-linux-gnu libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz python3 cpio lld p7zip-full
+    
+    
+    
+    - name: Fetch toolchains
+      run: |
+        mkdir toolchain
+        cd toolchain
+        aria2c https://github.com/Samsung-MT6769-Devs/toolchain/releases/download/clang-21-f8df24015ae2e3c76673c2c9d7a6e4201a68bebd/clang-21-wmk.tar.zst
+        zstd --decompress clang-21-wmk.tar.zst
+        tar xf clang-21-wmk.tar
+      working-directory: kernel_root
+
+    - name: Build kernel
+      id: buildKernel
+      run: |
+        export PATH=$(pwd)/toolchain/clang-wmk/bin:$PATH
+        export CROSS_COMPILE="$(pwd)/toolchain/clang-wmk/bin/aarch64-linux-android-"
+        export CROSS_COMPILE_COMPAT="$(pwd)/toolchain/clang-wmk/bin/arm-linux-gnueabi-"
+        export CROSS_COMPILE_ARM32=$CROSS_COMPILE_COMPAT
+        export CLANG_TRIPLE=aarch64-linux-gnu-
+        export KBUILD_BUILD_USER="samo"
+        export KBUILD_BUILD_HOST="samo141988"
+        export BUILD_START=`date`
+        export SELINUX_STATE="Enforcing"
+        export IS_CI=true
+        export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
+        export DEVICE="SM-E225F"
+        export DEVICE_ID="f22"
+        export TARGET_PRODUCT="f22ins"
+        export KERNELSU="${{ github.event.inputs.KSU }}"
+        export LLVM=1
+        export LLVM_IAS=1
+        export LTO="${{ github.event.inputs.LTO }}"
+  
+        bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
+        
+        if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
+        	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
+        	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
+        else
+        	KSU_VERSION="No KernelSU"
+        fi
+        echo "- KernelSU version: $KSU_VERSION"
+
+        if [ -e $(pwd)/include/linux/susfs.h ]; then
+          SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
+        else
+          SUSFS_VERSION="Not available"
+        fi
+        
+        ## CREATE buildDetails.txt
+        printf "Localversion: `./getutsrel`
+        Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
+        Build date: `echo $BUILD_START`
+        Defconfig: `echo $DEFCONFIG`
+        KernelSU: `echo $KSU_VERSION`
+        Susfs: `echo $SUSFS_VERSION`
+        LTO: $LTO
+        SELinux: `echo $SELINUX_STATE`
+        " >> buildDetails.txt
+        
+        echo "TITLE=Galaxy `echo $DEVICE_ID` Kernel" >> $GITHUB_ENV
+        
+        echo ""
+        echo "===================================================="
+        strings out/arch/arm64/boot/Image | grep "Linux version"
+        echo "===================================================="
+
+        mv out/.config out/build_config.txt
+        gitsha1=$(git rev-parse --short HEAD)
+        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
+      working-directory: kernel_root
+      
+    - name: Upload config
+      uses: actions/upload-artifact@v4
+      with:
+        name: Config-${{ steps.buildKernel.outputs.buildDetails }}
+        path: kernel_root/out/build_config.txt
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build-${{ steps.buildKernel.outputs.buildDetails }}
+        path: |
+          kernel_root/out/arch/arm64/boot/*.gz
+          kernel_root/out/arch/arm64/boot/dts/mediatek/*.dtb
+
+    - name: Upload AnyKernel3
+      uses: actions/upload-artifact@v4
+      with:
+        name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
+        path: kernel_root/AnyKernel3/*
+        compression-level: 9
+        
+    
