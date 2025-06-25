@@ -1,4 +1,4 @@
-name: build with swap 20
+name: Rissu Builder Kernel swap 20 gb
 on:
   workflow_dispatch:
     inputs:
@@ -43,17 +43,14 @@ jobs:
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
-
-    
+        
     - name: Prepare dependencies
       run: |
         sudo apt update -y
         sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget aria2 curl lz4 zst -y
         sudo aptitude install libssl-dev -y
         sudo apt install apt-utils nano bc bison ca-certificates curl flex gcc git libc6-dev libssl-dev openssl ssh wget zip zstd sudo make clang gcc-arm-linux-gnueabi software-properties-common build-essential libarchive-tools gcc-aarch64-linux-gnu libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz python3 cpio lld p7zip-full
-    
-    
-    
+
     - name: Fetch toolchains
       run: |
         mkdir toolchain
