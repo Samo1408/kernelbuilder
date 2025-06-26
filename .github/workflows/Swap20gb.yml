@@ -105,7 +105,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Build-${{ steps.buildKernel.outputs.buildDetails }}
+        name: Build-f22_defconfig
         path: |
           kernel_root/out/arch/arm64/boot/*.gz
           kernel_root/out/arch/arm64/boot/dts/mediatek/*.dtb
@@ -113,7 +113,7 @@ jobs:
     - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
-        name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
+        name: AnyKernel3-f22-wmk
         path: kernel_root/AnyKernel3/*
         compression-level: 9
         
