@@ -55,7 +55,7 @@ jobs:
       id: buildKernel
       run: |
         bash $(pwd)/build_kernel.sh
-        
+      working-directory: kernel_root
       
     - name: 7️⃣✅️Upload AnyKernel3
       uses: actions/upload-artifact@v4
@@ -63,5 +63,4 @@ jobs:
         name: AnyKernel3-f22-wmk
         path: kernel_root/AnyKernel3/*
         compression-level: 9
-        
-    
+      
