@@ -19,14 +19,14 @@ jobs:
     runs-on: ubuntu-24.04
     environment: telegramUpload
     steps:
-    - name: Get date
+    - name: 1️⃣Get date
       id: rundate
       run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/America/Chicago /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
-    - name: Set Swap Space
+    - name: 2️⃣Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
           swap-size-gb: 20
-    - uses: actions/checkout@v4
+    - uses: 3️⃣actions/checkout@v4
       with:
         path: kernel_root
         repository: "Samo141988/kernel_samsung_f22_wmk_rebased"
@@ -34,14 +34,14 @@ jobs:
         show-progress: false
         fetch-depth: 1
         
-    - name: Prepare dependencies
+    - name: 4️⃣Prepare dependencies
       run: |
         sudo apt update -y
         sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget aria2 curl lz4 zst -y
         sudo aptitude install libssl-dev -y
         sudo apt install apt-utils nano bc bison ca-certificates curl flex gcc git libc6-dev libssl-dev openssl ssh wget zip zstd sudo make clang gcc-arm-linux-gnueabi software-properties-common build-essential libarchive-tools gcc-aarch64-linux-gnu libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz python3 cpio lld p7zip-full
         sudo git clone https://github.com/rsuntk/AnyKernel3.git
-    - name: Fetch toolchains
+    - name: 5️⃣Fetch toolchains
       run: |
         mkdir toolchain
         cd toolchain
@@ -50,24 +50,18 @@ jobs:
         tar xf clang-21-wmk.tar
       working-directory: kernel_root
 
-    - name: Build kernel
+    - name: 6️⃣Build kernel
       id: buildKernel
       run: |
         export PATH=$(pwd)/toolchain/clang-wmk/bin:$PATH
-        export CROSS_COMPILE="$(pwd)/toolchain/clang-wmk/bin/aarch64-linux-android-"
-        export CROSS_COMPILE_COMPAT="$(pwd)/toolchain/clang-wmk/bin/arm-linux-gnueabi-"
-        export CROSS_COMPILE_ARM32=$CROSS_COMPILE_COMPAT
-        export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_USER="samo"
         export KBUILD_BUILD_HOST="samo141988"
-        export BUILD_START=`date`
         export SELINUX_STATE="Enforcing"
         export IS_CI=true
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export DEVICE="SM-E225F"
         export DEVICE_ID="f22"
         export TARGET_PRODUCT="f22ins"
-        export KERNELSU="${{ github.event.inputs.KSU }}"
         export LLVM=1
         export LLVM_IAS=1
         export LTO=THIN
@@ -75,18 +69,8 @@ jobs:
         bash $(pwd)/build_kernel.sh
         
       working-directory: kernel_root
-        
       
-    
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Build-f22_defconfig
-        path: |
-          kernel_root/out/arch/arm64/boot/*.gz
-          kernel_root/out/arch/arm64/boot/dts/mediatek/*.dtb
-
-    - name: Upload AnyKernel3
+    - name: 7️⃣✅️Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
         name: AnyKernel3-f22-wmk
