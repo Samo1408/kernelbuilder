@@ -38,9 +38,9 @@ jobs:
     - name: 4️⃣Prepare dependencies
       run: |
         sudo apt update -y
-        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget aria2 curl lz4 zst -y
+        sudo apt install bc aptitude cpio flex git python-is-python3 tar perl wget aria2 curl lz4 -y
         sudo aptitude install libssl-dev -y
-        sudo apt install apt-utils nano bc bison ca-certificates curl flex gcc git libc6-dev libssl-dev openssl ssh wget zip zstd sudo make clang gcc-arm-linux-gnueabi software-properties-common build-essential libarchive-tools gcc-aarch64-linux-gnu libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz python3 cpio lld p7zip-full
+        sudo apt install apt-utils nano bison ca-certificates gcc libc6-dev libssl-dev openssl ssh zip zstd make software-properties-common build-essential libarchive-tools libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full
         sudo git clone https://github.com/rsuntk/AnyKernel3.git
     - name: 5️⃣Fetch toolchains
       run: |
@@ -54,13 +54,8 @@ jobs:
     - name: 6️⃣Build kernel
       id: buildKernel
       run: |
-        
-        export SELINUX_STATE="Enforcing"
-        export LTO=THIN
-  
         bash $(pwd)/build_kernel.sh
         
-      working-directory: kernel_root
       
     - name: 7️⃣✅️Upload AnyKernel3
       uses: actions/upload-artifact@v4
