@@ -72,8 +72,9 @@ jobs:
         export LLVM_IAS=1
         export LTO=THIN
   
-        sudo bash $(pwd)/build_kernel.sh
+        bash $(pwd)/build_kernel.sh
         
+      working-directory: kernel_root
         
       
     
