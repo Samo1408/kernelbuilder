@@ -72,9 +72,9 @@ jobs:
         export KERNELSU="${{ github.event.inputs.KSU }}"
         export LLVM=1
         export LLVM_IAS=1
-        export LTO="${{ github.event.inputs.LTO }}"
+        export LTO=THIN
   
-        bash $(pwd)/build_kernel.sh BUILD_CMD --jobs $(nproc --all) `echo $DEFCONFIG`
+        sudo bash $(pwd)/build_kernel.sh
         
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
