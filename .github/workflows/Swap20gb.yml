@@ -14,15 +14,7 @@ on:
         description: Add KernelSU support
         type: boolean
       
-      LTO:
-        description: 'Link Time Optimisation'
-        required: true
-        default: 'none'
-        type: choice
-        options:
-          - none
-          - thin
-          - full
+      
       
 jobs:
   build:
@@ -105,7 +97,7 @@ jobs:
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
         Susfs: `echo $SUSFS_VERSION`
-        LTO: $LTO
+        LTO: full
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
         
