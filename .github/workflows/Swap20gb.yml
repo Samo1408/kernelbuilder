@@ -90,16 +90,7 @@ jobs:
           SUSFS_VERSION="Not available"
         fi
         
-        ## CREATE buildDetails.txt
-        printf "Localversion: `./getutsrel`
-        Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
-        Build date: `echo $BUILD_START`
-        Defconfig: `echo $DEFCONFIG`
-        KernelSU: `echo $KSU_VERSION`
-        Susfs: `echo $SUSFS_VERSION`
-        LTO: thin
-        SELinux: `echo $SELINUX_STATE`
-        " >> buildDetails.txt
+        
         
         echo "TITLE=Galaxy `echo $DEVICE_ID` Kernel" >> $GITHUB_ENV
         
@@ -108,17 +99,9 @@ jobs:
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
 
-        mv out/.config out/build_config.txt
-        gitsha1=$(git rev-parse --short HEAD)
-        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
-      working-directory: kernel_root
+        working-directory: kernel_root
       
-    - name: Upload config
-      uses: actions/upload-artifact@v4
-      with:
-        name: Config-${{ steps.buildKernel.outputs.buildDetails }}
-        path: kernel_root/out/build_config.txt
-        
+    
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
