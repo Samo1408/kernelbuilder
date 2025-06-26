@@ -10,9 +10,7 @@ on:
         description: Defconfig
         default: 'f22_defconfig'
         required: false
-      KSU:
-        description: Add KernelSU support
-        type: boolean
+      
       
       
       
@@ -76,30 +74,7 @@ jobs:
   
         sudo bash $(pwd)/build_kernel.sh
         
-        if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
-        	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
-        	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
-        else
-        	KSU_VERSION="No KernelSU"
-        fi
-        echo "- KernelSU version: $KSU_VERSION"
-
-        if [ -e $(pwd)/include/linux/susfs.h ]; then
-          SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
-        else
-          SUSFS_VERSION="Not available"
-        fi
         
-        
-        
-        echo "TITLE=Galaxy `echo $DEVICE_ID` Kernel" >> $GITHUB_ENV
-        
-        echo ""
-        echo "===================================================="
-        strings out/arch/arm64/boot/Image | grep "Linux version"
-        echo "===================================================="
-
-        working-directory: kernel_root
       
     
     - name: Upload artifacts
