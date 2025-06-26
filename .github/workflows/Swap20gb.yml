@@ -26,7 +26,8 @@ jobs:
       uses: pierotofy/set-swap-space@master
       with:
           swap-size-gb: 20
-    - uses: 3️⃣actions/checkout@v4
+    - uses: actions/checkout@v4
+      name: 3️⃣actions/checkout
       with:
         path: kernel_root
         repository: "Samo141988/kernel_samsung_f22_wmk_rebased"
