@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'Susfs_add'
+        default: 'wmk-rebased'
         required: true
       DEFCONFIG: 
         description: Defconfig
@@ -97,7 +97,7 @@ jobs:
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
         Susfs: `echo $SUSFS_VERSION`
-        LTO: full
+        LTO: thin
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
         
