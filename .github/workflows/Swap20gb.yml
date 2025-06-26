@@ -74,7 +74,7 @@ jobs:
         export LLVM_IAS=1
         export LTO="${{ github.event.inputs.LTO }}"
   
-        bash $(pwd)/build_kernel.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
+        bash $(pwd)/build_kernel.sh BUILD_CMD --jobs $(nproc --all) `echo $DEFCONFIG`
         
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
