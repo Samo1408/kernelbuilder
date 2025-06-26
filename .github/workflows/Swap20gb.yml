@@ -38,7 +38,6 @@ jobs:
         sudo apt upgrade -y
         sudo apt install bc aptitude cpio flex git python-is-python3 tar perl wget aria2 curl lz4 sudo -y
         sudo apt install apt-utils nano bison ca-certificates libc6-dev libssl-dev openssl ssh zip zstd make software-properties-common build-essential libarchive-tools libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full
-        sudo git clone https://github.com/rsuntk/AnyKernel3.git
     - name: 5️⃣Fetch toolchains
       run: |
         mkdir toolchain
