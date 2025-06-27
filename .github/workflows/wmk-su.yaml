@@ -21,10 +21,6 @@ jobs:
     - name: Record build time
       run: |
        echo "BUILD_START=$(date +%s)" >> $GITHUB_ENV
-    - name: Clear memory cache
-      run: |
-           sync
-           sudo sh -c echo 3 > /proc/sys/vm/drop_caches
     - name: Check build success
       if: ${{ failure() }}
       run: |
