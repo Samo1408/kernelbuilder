@@ -21,11 +21,7 @@ jobs:
     - name: Record build time
       run: |
        echo "BUILD_START=$(date +%s)" >> $GITHUB_ENV
-    - name: Check build success
-      if: ${{ failure() }}
-      run: |
-           echo "Build failed! Check logs above"
-           exit 1       
+           
     - name: 1️⃣Get date
       id: rundate
       run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/America/Chicago /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
@@ -76,8 +72,6 @@ jobs:
     - name: 8️⃣ Build kernel
       id: buildKernel
       run: |
-           make mrproper
-           rm -rf out/
            if [[ "${{ github.event.inputs.KSU }}" == "true" ]]; then
            echo "CONFIG_KSU=y" > .config
            echo "CONFIG_KSU_DEBUG=n" >> .config
@@ -91,7 +85,11 @@ jobs:
            fi
            echo "KSU_VERSION=$KSU_VERSION" >> $GITHUB_OUTPUT
       working-directory: kernel_root
-    
+    - name: Check build success
+      if: ${{ failure() }}
+      run: |
+           echo "Build failed! Check logs above"
+           exit 1
     - name: 7️⃣Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
