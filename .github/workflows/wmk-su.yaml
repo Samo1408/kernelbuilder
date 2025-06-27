@@ -52,12 +52,22 @@ jobs:
     - name: 6️⃣Build kernel
       id: buildKernel
       run: |
-        export KERNELSU=true
+        export IS_CI=true
+        export KERNELSU="${{ github.event.inputs.KSU }}"
         bash $(pwd)/build_kernel.sh
-        KSU_REV_COUNT=$(cd KernelSU-Next && git rev-list --count HEAD)
-        KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
-        SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
-       
+        if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
+        	KSU_REV_COUNT=$(cd KernelSU-Next && git rev-list --count HEAD)
+        	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
+        else
+        	KSU_VERSION="No KernelSU"
+        fi
+        echo "- KernelSU version: $KSU_VERSION"
+
+        if [ -e $(pwd)/include/linux/susfs.h ]; then
+          SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
+        else
+          SUSFS_VERSION="Not available"
+        fi
       working-directory: kernel_root
       
     - name: 7️⃣✅️Upload AnyKernel3
