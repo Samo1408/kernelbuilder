@@ -10,9 +10,7 @@ on:
         description: Defconfig
         default: 'f22_defconfig'
         required: false
-      KSU:
-        description: Add KernelSU support
-        type: boolean
+    
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -53,31 +51,7 @@ jobs:
         tar xf clang-21-wmk.tar
       working-directory: kernel_root
 
-    - name: 6️⃣ Add KernelSU if needed
-      if: ${{ github.event.inputs.KSU == 'true' }}
-      run: |
-         curl -LSs https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh | bash -s next
-         echo "Toolchain Path: $(pwd)/toolchain/clang-21-wmk/bin"
-         export PATH="$(pwd)/toolchain/clang-21-wmk/bin:$PATH"
-         export ARCH=arm64
-         export SUBARCH=arm64
-         if [[ "${{ github.event.inputs.KSU }}" == "true" ]]; then
-           echo "CONFIG_KSU=y" > .config
-           echo "CONFIG_KSU_DEBUG=n" >> .config
-           fi
-         if [[ "${{ github.event.inputs.KSU }}" == "true" ]]; then
-         export KSU_BUILD=true
-         export KSU_OVERRIDE_CONFIG=1
-         fi
-         if [[ "${{ github.event.inputs.KSU }}" == "true" ]]; then
-             KSU_REV_COUNT=$(cd KernelSU-Next && git rev-list --count HEAD)
-             KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
-           else
-             KSU_VERSION="No KernelSU"
-           fi
-           echo "KSU_VERSION=$KSU_VERSION" >> $GITHUB_OUTPUT
-      working-directory: kernel_root
-
+   
     - name: 8️⃣ Build kernel
       id: buildKernel
       run: |
