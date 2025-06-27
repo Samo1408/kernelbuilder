@@ -10,7 +10,9 @@ on:
         description: Defconfig
         default: 'f22_defconfig'
         required: false
-      
+      KSU:
+        description: Add KernelSU support
+        type: boolean
 jobs:
   build:
     runs-on: ubuntu-24.04
