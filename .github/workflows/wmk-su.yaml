@@ -37,7 +37,7 @@ jobs:
         sudo apt update -y
         sudo apt upgrade -y
         sudo apt install bc aptitude cpio flex git python-is-python3 tar perl wget aria2 curl lz4 sudo -y
-        sudo apt install apt-utils nano bison ca-certificates libc6-dev libssl-dev openssl ssh zip zstd make software-properties-common build-essential libarchive-tools libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full
+        sudo apt install apt-utils nano bison ca-certificates libc6-dev libssl-dev openssl ssh zip zstd software-properties-common build-essential libarchive-tools libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full
     - name: 5️⃣Fetch toolchains
       run: |
         mkdir toolchain
@@ -53,7 +53,7 @@ jobs:
         export KERNELSU=true
         export IS_CI=true
         bash $(pwd)/build_kernel.sh
-        KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
+        KSU_REV_COUNT=$(cd KernelSU-Next && git rev-list --count HEAD)
         KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
         SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
        
