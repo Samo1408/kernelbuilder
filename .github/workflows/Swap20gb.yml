@@ -1,10 +1,10 @@
-name: Rissu Builder Kernel swap 20 gb
+name: Build Kernel swap 28 gb KSU
 on:
   workflow_dispatch:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'wmk-rebased'
+        default: 'Susfs_add'
         required: true
       DEFCONFIG: 
         description: Defconfig
@@ -22,7 +22,7 @@ jobs:
     - name: 2️⃣Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-          swap-size-gb: 20
+          swap-size-gb: 28
     - uses: actions/checkout@v4
       name: 3️⃣actions/checkout
       with:
