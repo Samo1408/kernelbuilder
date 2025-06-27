@@ -64,6 +64,9 @@ jobs:
          export KSU_BUILD=true
          export KSU_OVERRIDE_CONFIG=1
          fi
+         sudo git clone https://github.com/KernelSU-Next/KernelSU-Next.git -b next
+         cd KernelSU-Next
+         bash $(pwd)/KernelSU-Next/kernel/setup.sh
       working-directory: kernel_root
 
     - name: 8️⃣ Build kernel
