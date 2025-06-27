@@ -53,6 +53,7 @@ jobs:
         export LTO=THIN
         make clean
         curl -LSs "https://raw.githubusercontent.com/Samo141988/KernelSU/next-susfs/kernel/setup.sh" | bash -s next-susfs
+        patch -p1 <107.patch
         bash $(pwd)/build_kernel.sh
       working-directory: kernel_root
       
