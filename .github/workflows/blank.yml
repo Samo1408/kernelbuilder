@@ -50,6 +50,7 @@ jobs:
     - name: 6️⃣Build kernel
       id: buildKernel
       run: |
+        export LTO=THIN
         make clean
         wget https://gist.githubusercontent.com/zainarbani/2b482e9e9c415a644953397b6ba5571f/raw/b66cf8d0683b5397fc1f7cc6b33ff12cc9bf9292/ksu.patch
         git apply ksu.patch || exit
