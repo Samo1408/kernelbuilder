@@ -57,5 +57,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: AnyKernel3-f22-wmk
-        path: kernel_root/AnyKernel3/*
+        path: kernel_root/AnyKernel/*
         compression-level: 9
