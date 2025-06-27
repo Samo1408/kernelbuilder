@@ -56,9 +56,7 @@ jobs:
     - name: 6️⃣ Add KernelSU if needed
       if: ${{ github.event.inputs.KSU == 'true' }}
       run: |
-         git clone https://github.com/KernelSU-Next/KernelSU-Next.git --depth=1
-         cd KernelSU-Next && git submodule update --init
-         cd ..
+         curl -LSs $DEFAULT_KSU_REPO | bash -s next
          echo "Toolchain Path: $(pwd)/toolchain/clang-21-wmk/bin"
          export PATH="$(pwd)/toolchain/clang-21-wmk/bin:$PATH"
          export ARCH=arm64
