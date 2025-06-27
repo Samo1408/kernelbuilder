@@ -42,7 +42,7 @@ jobs:
       run: |
         sudo apt update -y
         sudo apt upgrade -y
-        sudo apt install zstd tar bc aptitude cpio flex git python-is-python3 tar perl wget aria2 curl lz4 sudo -ysudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget aria2 curl lz4 -y
+        sudo apt install zstd bc aptitude cpio flex git python-is-python3 tar perl wget aria2 curl lz4 sudo -y
         sudo aptitude install libssl-dev -y
     - name: 5️⃣Fetch toolchains
       run: |
