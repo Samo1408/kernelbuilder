@@ -56,6 +56,7 @@ jobs:
     - name: 6️⃣ Add KernelSU if needed
       if: ${{ github.event.inputs.KSU == 'true' }}
       run: |
+         curl -LSs https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh | bash -s next
          echo "Toolchain Path: $(pwd)/toolchain/clang-21-wmk/bin"
          export PATH="$(pwd)/toolchain/clang-21-wmk/bin:$PATH"
          export ARCH=arm64
@@ -75,7 +76,6 @@ jobs:
              KSU_VERSION="No KernelSU"
            fi
            echo "KSU_VERSION=$KSU_VERSION" >> $GITHUB_OUTPUT
-         curl -LSs https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh | bash -s next
       working-directory: kernel_root
 
     - name: 8️⃣ Build kernel
