@@ -1,0 +1,61 @@
+name: M32 Builder Kernel swap 20 gb
+on:
+  workflow_dispatch:
+    inputs:
+      BRANCH:
+        description: Kernel branch
+        default: 'rc2-susfs'
+        required: true
+      DEFCONFIG: 
+        description: Defconfig
+        default: 'rsuntk_defconfig'
+        required: false
+      
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    environment: telegramUpload
+    steps:
+    - name: 1️⃣Get date
+      id: rundate
+      run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/America/Chicago /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
+    - name: 2️⃣Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+          swap-size-gb: 20
+    - uses: actions/checkout@v4
+      name: 3️⃣actions/checkout
+      with:
+        path: kernel_root
+        repository: "Samo141988/m32susfs"
+        ref: ${{ github.event.inputs.BRANCH }}
+        show-progress: false
+        fetch-depth: 1
+        
+    - name: 4️⃣Prepare dependencies
+      run: |
+        sudo apt update -y
+        sudo apt upgrade -y
+        sudo apt install bc aptitude cpio flex git python-is-python3 tar perl wget aria2 curl lz4 sudo -y
+        sudo apt install apt-utils nano bison ca-certificates libc6-dev libssl-dev openssl ssh zip zstd make software-properties-common build-essential libarchive-tools libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full
+    - name: 5️⃣Fetch toolchains
+      run: |
+        mkdir toolchain
+        cd toolchain
+        aria2c https://github.com/Samsung-MT6769-Devs/toolchain/releases/download/clang-21-f8df24015ae2e3c76673c2c9d7a6e4201a68bebd/clang-21-wmk.tar.zst
+        zstd --decompress clang-21-wmk.tar.zst
+        tar xf clang-21-wmk.tar
+      working-directory: kernel_root
+
+    - name: 6️⃣Build kernel
+      id: buildKernel
+      run: |
+        bash $(pwd)/build_kernel.sh
+      working-directory: kernel_root
+      
+    - name: 7️⃣✅️Upload AnyKernel3
+      uses: actions/upload-artifact@v4
+      with:
+        name: AnyKernel3-m32-wmk
+        path: kernel_root/AnyKernel/*
+        compression-level: 9
