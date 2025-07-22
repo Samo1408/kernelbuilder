@@ -23,6 +23,22 @@ jobs:
       uses: pierotofy/set-swap-space@master
       with:
           swap-size-gb: 20
+          
+    - name: 2️⃣⅕Install ccache
+      run: sudo apt update && sudo apt install -y ccache
+
+    - name: 2️⃣¾ Set up ccache
+      run: |
+          mkdir -p ~/.cache/bazel
+          ccache --version
+          ccache --max-size=4G
+          ccache --set-config=compression=true
+          
+    
+    - name: 2️⃣⅗ Check Disk Space Before Sync
+      run: |
+          echo "Disk space before kernel source sync:"
+          df -h      
     - uses: actions/checkout@v4
       name: 3️⃣actions/checkout
       with:
