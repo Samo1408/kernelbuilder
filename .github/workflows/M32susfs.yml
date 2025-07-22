@@ -32,11 +32,15 @@ jobs:
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
+
+
+    - name: Install ccache
+      run: sudo apt update && sudo apt install -y ccache
+
+    
         
     - name: 4️⃣Prepare dependencies
       run: |
-        sudo apt update -y ccache
-        sudo apt upgrade -y
         sudo apt install bc aptitude cpio flex git python-is-python3 tar perl wget aria2 curl lz4 sudo -y
         sudo apt install apt-utils nano bison ca-certificates libc6-dev libssl-dev openssl ssh zip zstd make software-properties-common build-essential libarchive-tools libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full
 
