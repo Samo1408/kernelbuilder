@@ -60,11 +60,10 @@ jobs:
       run: |
         mkdir toolchain
         cd toolchain
-        mkdir clang && cd clang
-        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
-        URL="https://github.com/ZyCromerZ/Clang/releases/download/21.0.0git-20250208-release/Clang-21.0.0git-20250208.tar.gz"
-        wget -q -O clang.tar.gz $URL
-        tar -xf clang.tar.gz && rm clang.tar.gz && cd ..
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-12
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
+        mv clang-12 clang
+        mv androidcc-4.9 google
       working-directory: kernel_root
 
     - name: 6️⃣Build kernel
