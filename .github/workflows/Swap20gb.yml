@@ -1,14 +1,14 @@
-name: Builder Kernel f22_wmk_kernel
+name: Builder Kernel m12_kernel
 on:
   workflow_dispatch:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'wmk-rebased'
+        default: 'm12susfsnext'
         required: true
       DEFCONFIG: 
         description: Defconfig
-        default: 'f22_defconfig'
+        default: 'm12susfs'
         required: false
       
 jobs:
@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: kernel_root
-        repository: "Samo141988/kernel_samsung_f22_wmk_rebased"
+        repository: "Samo1408/m12kernel"
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
