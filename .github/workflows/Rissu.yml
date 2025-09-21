@@ -1,14 +1,14 @@
-name: Rissu Builder Kernel
+name: Rissu  M12 Builder Kernel
 on:
   workflow_dispatch:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'Susfs_add'
+        default: 'm12susfsnext'
         required: true
       DEFCONFIG: 
         description: Defconfig
-        default: 'f22_defconfig'
+        default: 'm12susfs'
         required: false
       KSU:
         description: Add KernelSU support
@@ -35,7 +35,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: kernel_root
-        repository: "Samo141988/kernel_samsung_f22_wmk_rebased"
+        repository: "Samo1408/m12kernel"
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
@@ -78,9 +78,9 @@ jobs:
         export SELINUX_STATE="Enforcing"
         export IS_CI=true
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        export DEVICE="E225F"
-        export DEVICE_ID="F22"
-        export TARGET_PRODUCT="f22ins"
+        export DEVICE="M127F"
+        export DEVICE_ID="M12"
+        export TARGET_PRODUCT="m12"
         export KERNELSU="${{ github.event.inputs.KSU }}"
         export LLVM=1
         export LLVM_IAS=1
