@@ -51,7 +51,7 @@ jobs:
     - name: 6️⃣Build kernel
       id: buildKernel
       run: |
-        bash $(pwd)/build_kernel.sh
+        bash $(pwd)/build.sh
       working-directory: kernel_root
       
     - name: 7️⃣✅️Upload AnyKernel3
