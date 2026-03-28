@@ -35,21 +35,13 @@ jobs:
     
     - name: 4️⃣⅓Install ccache
       run: sudo apt update && sudo apt upgrade -y
-         sudo apt install bc aptitude cpio flex git python-is-python3 tar perl wget aria2 curl lz4
-         sudo apt install apt-utils nano bison ca-certificates libc6-dev libssl-dev openssl ssh zip zstd make software-properties-common build-essential libarchive-tools libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full
+         sudo apt install bc aptitude cpio flex git tar perl wget aria2 curl lz4 -y
+         sudo apt install apt-utils nano bison ca-certificates libc6-dev libssl-dev openssl ssh zip zstd make build-essential libarchive-tools libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full -y
 
-    - name: 4️⃣⅔Set up ccache
-      run: |
-          mkdir -p ~/.cache/bazel
-          ccache --version
-          ccache --max-size=8G
-          ccache --set-config=compression=true
+    
           
     
-    - name: 4️⃣³Check Disk Space Before Sync
-      run: |
-          echo "Disk space before kernel source sync:"
-          df -h
+    
     - name: 5️⃣Fetch toolchains
       run: |
         mkdir toolchain
@@ -68,6 +60,6 @@ jobs:
     - name: 7️⃣✅️Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
-        name: AnyKernel3-f22-wmk
+        name: AnyKernel3-m12-wmk
         path: kernel_root/AnyKernel/*
         compression-level: 9
