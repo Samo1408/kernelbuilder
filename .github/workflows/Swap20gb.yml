@@ -34,10 +34,7 @@ jobs:
         
     
     - name: 4️⃣⅓Install ccache
-      run: sudo apt update && sudo apt upgrade -y
-         sudo apt install bc cpio git tar perl wget aria2 curl lz4 -y
-         sudo apt install nano bison ca-certificates libc6-dev libssl-dev zip zstd make build-essential libarchive-tools libssl-dev libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full -y
-
+      run: sudo apt update && sudo apt upgrade -y && sudo apt install bc cpio git tar perl wget aria2 curl lz4 nano bison ca-certificates libc6-dev libssl-dev zip zstd make build-essential libarchive-tools libffi-dev libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev libsqlite3-dev pigz p7zip-full -y
     
           
     
