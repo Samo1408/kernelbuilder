@@ -1,0 +1,73 @@
+name: Android Kernel Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository: # The kernel repository to clone (e.g., LineageOS/android_kernel_oneplus_sm8150)
+        description: 'Kernel Repository (owner/repo)'
+        required: true
+        default: 'LineageOS/android_kernel_oneplus_sm8150'
+      branch:
+        description: 'Kernel Branch'
+        required: true
+        default: 'lineage-20'
+      toolchain_url:
+        description: 'Toolchain URL (optional)'
+        required: false
+        default: ''
+      toolchain_path:
+        description: 'Toolchain Path (optional, relative to workspace)'
+        required: false
+        default: 'toolchain'
+
+jobs:
+  build_kernel:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Workflow Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses5 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache libssl-dev libelf-dev
+
+    - name: Clone Kernel Source
+      run: |
+        git clone https://github.com/${{ github.event.inputs.repository }}.git kernel_source -b ${{ github.event.inputs.branch }}
+        cd kernel_source
+        git submodule update --init --recursive
+
+    - name: Download and Extract Toolchain (if provided)
+      if: github.event.inputs.toolchain_url != ''
+      run: |
+        wget -q ${{ github.event.inputs.toolchain_url }} -O toolchain.tar.gz
+        mkdir -p ${{ github.workspace }}/${{ github.event.inputs.toolchain_path }}
+        tar -xf toolchain.tar.gz -C ${{ github.workspace }}/${{ github.event.inputs.toolchain_path }} --strip-components=1
+        rm toolchain.tar.gz
+
+    - name: Set up Toolchain Environment
+      run: |
+        echo "PATH=${{ github.workspace }}/${{ github.event.inputs.toolchain_path }}/bin:$PATH" >> $GITHUB_ENV
+        echo "CROSS_COMPILE=${{ github.workspace }}/${{ github.event.inputs.toolchain_path }}/bin/aarch64-linux-android-" >> $GITHUB_ENV
+        echo "ARCH=arm64" >> $GITHUB_ENV
+      working-directory: kernel_source
+
+    - name: Build Kernel
+      run: |
+        make O=out ${{ github.event.inputs.repository | split('/') | last }}_defconfig
+        make -j$(nproc) O=out
+      working-directory: kernel_source
+
+    - name: Archive Kernel Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: kernel-artifacts-${{ github.run_id }}
+        path: kernel_source/out/arch/arm64/boot/*
+        retention-days: 5
